@@ -1,3 +1,3 @@
-# Deep Deterministic Policy Gradient (DDPG) applied to Atari
+# Deep Deterministic Policy Gradient (DDPG) applied to the CarRacing env
 
-This repo is just educational, it is an application of DDPG to the atari 2600 simulation intended to simplify experimenting with RL algorithms in general and trying new thing
+This repo is just educational, it is an application of DDPG to the CarRacing intended to experimenting with RL algorithms in general and trying new things
