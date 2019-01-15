@@ -9,5 +9,16 @@ def create_nn(input_ph,
 	Creates a NN based on parameters
 	'''
 	for size in hidden_sizes[:-1]:
-		input_ph = tf.layers.Dense(input_ph, units = size, activation = activations)
-	return tf.layers.Dense(input_ph, units = size[-1], activation = final_activation)
+		input_ph = tf.layers.dense(
+				inputs=input_ph, 
+				units = size, 
+				activation = activations)
+	return tf.layers.dense(input_ph, units = hidden_sizes[-1], activation = final_activation)
+
+def get_action(feed_dict, opt_action, sess, max_value):
+	'''
+	Returns an action vector from the output of opt_action
+	TODO: add Noise
+	'''
+	action = sess.run([opt_action], feed_dict=feed_dict)
+	return np.clip(action, -max_value, max_value)
