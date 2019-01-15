@@ -2,6 +2,7 @@
 import gym
 import tensorflow as tf
 from utils import create_nn, get_action
+from pdb import set_trace
 
 # Set Hyper-parameters
 num_epochs 	 = 1000
@@ -11,7 +12,7 @@ delay        = 10    # The number of steps deleyed to update target networks
 hidden_sizes = [400,300]
 
 # Create environment
-env = gym.make('CarRacing-v0')
+env = gym.make('BipedalWalker-v2')
 s   = env.reset()
 env.render()
 
@@ -32,9 +33,9 @@ with tf.variable_scope('main'):
 		hidden_sizes=hidden_sizes+[1])
 	opt_action        = create_nn(s_ph,hidden_sizes=hidden_sizes+[action_dim])
 with tf.variable_scope('target'):
+	opt_action_value_target = create_nn(s_ph, hidden_sizes+[1])
 	opt_action_target = create_nn(tf.concat([a_ph,s_ph], axis=-1), 
-		hidden_sizes=hidden_sizes+[1])
-	opt_action_value_target = create_nn(s_ph, hidden_sizes+[action_dim])
+		hidden_sizes=hidden_sizes+[action_dim])
 
 # Set buffer
 buf = None 
@@ -45,13 +46,14 @@ config.gpu_options.allow_growth = True
 sess = tf.Session(config=config)
 
 # Initialize placeholders
+tf.global_variables_initializer().run(session=sess)
 
 # Main loop
 for epoch in range(num_epochs):
 	# Episode
 	for ep in range(ep_per_epoch):
 		a = get_action({s_ph: s.reshape(1,-1)}, opt_action, sess, max_act_val)
-		s, r, done, _ = env.step(a)
+		s, r, done, _ = env.step(a[0])
 		env.render()
 
 		# Store transition
