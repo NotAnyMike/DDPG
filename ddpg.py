@@ -2,6 +2,7 @@
 import gym
 import tensorflow as tf
 from utils import create_nn, get_action
+from replay_buffer import ReplayBuffer
 from pdb import set_trace
 
 # Set Hyper-parameters
@@ -10,10 +11,10 @@ ep_per_epoch = 80
 star_steps   = 100
 delay        = 10    # The number of steps deleyed to update target networks
 hidden_sizes = [400,300]
+buffer_size  = 1e6
 
 # Create environment
 env = gym.make('BipedalWalker-v2')
-s   = env.reset()
 env.render()
 
 # Get imporant variables
@@ -38,7 +39,7 @@ with tf.variable_scope('target'):
 		hidden_sizes=hidden_sizes+[action_dim])
 
 # Set buffer
-buf = None 
+buf = ReplayBuffer(buffer_size, action_dim, obs_dim)
 
 # Start session and set dynamic memory
 config = tf.ConfigProto()
@@ -51,13 +52,25 @@ tf.global_variables_initializer().run(session=sess)
 # Main loop
 for epoch in range(num_epochs):
 	# Episode
+	s = env.reset()
 	for ep in range(ep_per_epoch):
 		a = get_action({s_ph: s.reshape(1,-1)}, opt_action, sess, max_act_val)
-		s, r, done, _ = env.step(a[0])
+		s2, r, done, _ = env.step(a[0])
 		env.render()
 
+		# Ignoring done signal if comes from end of episode
+		# because d is about if the agent died because of a
+		# very bad action, not because the episode ended
+		# TODO could send wrong information
+		d = False if ep==ep_per_epoch else done
+		
 		# Store transition
-	
-	# Update functions	
+		buf.store(s,a,r,s2,d)
 
-	# Update target functions
+		s = s2
+		if d:
+			break
+	
+	# Update functions TODO
+
+	# Update target functions TODO
