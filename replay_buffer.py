@@ -30,7 +30,7 @@ class ReplayBuffer:
 		'''
 		idx = np.random.randint(0, self.size, batch_size)
 		return dict(s=self._s_buff[idx],
-					a=self._a_buff[idx],
-					r=self._r_buff[idx],
-					s2=self._s2_buff[idx],
-					d=self._d_buff[idx])
+                            a=self._a_buff[idx],
+                            r=self._r_buff[idx],
+                            s2=self._s2_buff[idx],
+                            d=self._d_buff[idx])
