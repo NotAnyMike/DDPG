@@ -6,12 +6,12 @@ from replay_buffer import ReplayBuffer
 from pdb import set_trace
 
 # Set Hyper-parameters
-num_epochs 	 = 1000
-ep_per_epoch = 80
+num_epochs 	 = 80
+ep_per_epoch = 1000
 star_steps   = 100
 delay        = 10    # The number of steps deleyed to update target networks
 hidden_sizes = [400,300]
-buffer_size  = 1e6
+buffer_size  = int(1e6)
 
 # Create environment
 env = gym.make('BipedalWalker-v2')
@@ -39,7 +39,7 @@ with tf.variable_scope('target'):
 		hidden_sizes=hidden_sizes+[action_dim])
 
 # Set buffer
-buf = ReplayBuffer(buffer_size, action_dim, obs_dim)
+buf = ReplayBuffer(buffer_size, obs_dim, action_dim)
 
 # Start session and set dynamic memory
 config = tf.ConfigProto()
