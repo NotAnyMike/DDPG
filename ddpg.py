@@ -5,7 +5,8 @@ import numpy as np
 from utils import create_nn, get_action, get_vars, count_vars
 from replay_buffer import ReplayBuffer
 from pdb import set_trace
-from logx import EpochLogger
+from spinup.utils.logx import EpochLogger
+#from logx import EpochLogger
 
 # Set Hyper-parameters
 seed         = 0
@@ -150,7 +151,7 @@ for t in range(num_epochs*ep_per_epoch):
     if d or ep_len == max_ep_len:
         print("Updating (t %i/%i, rewd %0.2f)..." % (t,num_epochs*ep_per_epoch,rewd))
 
-        for _ in ep_len:
+        for _ in range(ep_len):
             # Starting to update the parameters
             # Sample experiences 
             D = buf.sample_batch(batch_size)
