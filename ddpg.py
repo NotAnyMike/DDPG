@@ -5,6 +5,7 @@ import numpy as np
 from utils import create_nn, get_action, get_vars, count_vars
 from replay_buffer import ReplayBuffer
 from pdb import set_trace
+from logx import EpochLogger
 
 # Set Hyper-parameters
 seed         = 0
@@ -104,6 +105,10 @@ target_update = tf.group(
 # Set buffer
 buf = ReplayBuffer(buffer_size, obs_dim, action_dim)
 
+# Set logger
+#logger = EpochLogger(**logger_kwargs)
+logger = EpochLogger()
+
 # Start session and set dynamic memory
 #config = tf.ConfigProto()
 #config.gpu_options.allow_growth = True
@@ -169,3 +174,18 @@ for t in range(num_epochs*ep_per_epoch):
 
         # Reset variables
         ep_len, rewd, s = 0, 0.0 , env.reset()
+
+    # Printing 
+    if t % ep_per_epoch == 0:
+        epoch = t // ep_per_epoch
+        pass
+        # Epoch
+        # EpRet
+        # TestEpRet
+        # EpLen
+        # TestEpLen
+        # TotalEnvInteracts
+        # QVals
+        # LossPi
+        # LossQ
+        # Time
