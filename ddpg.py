@@ -150,27 +150,32 @@ for t in range(num_epochs*ep_per_epoch):
     if d or ep_len == max_ep_len:
         print("Updating (t %i/%i, rewd %0.2f)..." % (t,num_epochs*ep_per_epoch,rewd))
 
-        # Starting to update the parameters
-        # Sample experiences 
-        D = buf.sample_branch(batch_size)
+        for _ in ep_len:
+            # Starting to update the parameters
+            # Sample experiences 
+            D = buf.sample_batch(batch_size)
 
-        # Creating feed_dic
-        feed_dict = {
-                s_ph: D['s'],
-                a_ph: D['a'],
-                r_ph: D['r'],
-                s2_ph:D['s2'],
-                d_ph: D['d']
-                }
+            # Creating feed_dic
+            feed_dict = {
+                    s_ph: D['s'],
+                    a_ph: D['a'],
+                    r_ph: D['r'],
+                    s2_ph:D['s2'],
+                    d_ph: D['d']
+                    }
 
-        # Update optimal action-value function (Q*)
-        sess.run([ loss_opt_act_val, opt_act_value_train], feed_dict=feed_dict)
+            # Update optimal action-value function (Q*)
+            outs = sess.run([ loss_opt_act_val, opt_act_value_train], feed_dict=feed_dict)
+            logger.store(LossQ=outs[0], QVals=outs[1])
 
-        # Update deterministic optimal action function (pi*)
-        sess.run([ loss_opt_action, opt_action_train], feed_dict=feed_dict)
+            # Update deterministic optimal action function (pi*)
+            outs = sess.run([ loss_opt_action, opt_action_train], feed_dict=feed_dict)
+            logger.store(LossPi=outs[0])
 
-        # Update target functions
-        sess.run([ target_update ], feed_dict=feed_dict)
+            # Update target functions
+            sess.run([ target_update ], feed_dict=feed_dict)
+
+        logger.store(EpRet=rewd, EpLen=ep_len)
 
         # Reset variables
         ep_len, rewd, s = 0, 0.0 , env.reset()

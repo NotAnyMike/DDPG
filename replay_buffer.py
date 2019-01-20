@@ -23,7 +23,7 @@ class ReplayBuffer:
 		self.ptr = (self.ptr + 1) % self.max_size
 		self.size = min(self.size+1, self.max_size)
 
-	def sample_branch(self, batch_size=32):
+	def sample_batch(self, batch_size=32):
 		'''
 		Returns a dictionary of batch_size size of random 
 		experiencies
