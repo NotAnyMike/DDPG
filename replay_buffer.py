@@ -28,7 +28,8 @@ class ReplayBuffer:
 		Returns a dictionary of batch_size size of random 
 		experiencies
 		'''
-		idx = np.random.randint(0, self.size, batch_size)
+		#print("size:", self.size, "ptr", self.ptr)
+		idx = np.random.randint(0, self.size, size=batch_size)
 		return dict(s=self._s_buff[idx],
                             a=self._a_buff[idx],
                             r=self._r_buff[idx],

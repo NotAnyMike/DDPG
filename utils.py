@@ -17,13 +17,13 @@ def create_nn(input_ph,
                                 activation = activations)
         return act_limit * tf.layers.dense(input_ph, units = hidden_sizes[-1], activation = final_activation)
 
-def get_action(feed_dict, opt_action, sess, max_value, act_dim):
+def get_action(feed_dict, opt_action, sess, max_value, act_dim, noise=0.1):
         '''
         Returns an action vector from the output of opt_action
         TODO: add Noise
         '''
-        action = sess.run([opt_action], feed_dict=feed_dict)[0]
-        action += 0.1 * np.random.randn(act_dim)
+        action = sess.run(opt_action, feed_dict=feed_dict)[0]
+        action += noise * np.random.randn(act_dim)
         return np.clip(action, -max_value, max_value)
 
 def get_vars(scope):
@@ -37,7 +37,14 @@ def test(env, max_ep_len, logger, feed_dict, opt_action, sess, max_value, act_di
     for _ in range(n):
         s, r, d, ep_len, ep_ret = env.reset(), 0.0, False, 0, 0.0
         while not d or ep_len < max_ep_len:
-            s, r, d, _ = env.step(get_action(feed_dict, opt_action, sess, max_value, act_dim)[0])
+            s, r, d, _ = env.step(get_action(
+                feed_dict, 
+                opt_action, 
+                sess, 
+                max_value, 
+                act_dim, 
+                0
+                ))
             ep_ret += r
             ep_len += 1
         logger.store(TestEpRet=ep_ret, TestEpLen=ep_len)

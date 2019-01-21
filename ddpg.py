@@ -8,6 +8,7 @@ from replay_buffer import ReplayBuffer
 from pdb import set_trace
 from spinup.utils.logx import EpochLogger
 from spinup.utils.run_utils import setup_logger_kwargs
+from tensorflow.python import debug as tf_debug
 
 # Set Hyper-parameters
 seed         = 0
@@ -119,6 +120,7 @@ buf = ReplayBuffer(buffer_size, obs_dim, action_dim)
 config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
 sess = tf.Session(config=config)
+#sess = tf_debug.TensorBoardDebugWrapperSession(sess, "MacBook-Air-de-Mike.local:7000")
 
 # Initialize placeholders
 sess.run(tf.global_variables_initializer())
@@ -138,7 +140,7 @@ for t in range(num_epochs*ep_per_epoch):
         if random_steps == t:
             print("Finished pure random episodes")
     else:
-        a = get_action({s_ph: s.reshape(1,-1)}, opt_action, sess, max_act, action_dim)[0]
+        a = get_action({s_ph: s.reshape(1,-1)}, opt_action, sess, max_act, action_dim)
 
     s2, r, done, _ = env.step(a)
     rewd += r
@@ -154,7 +156,7 @@ for t in range(num_epochs*ep_per_epoch):
     # Store transition
     buf.store(s,a,r,s2,d)
     s = s2
-
+    
     # Update
     if d or ep_len == max_ep_len:
         #print("Updating (t %i/%i, rewd %0.2f)..." % (t,num_epochs*ep_per_epoch,rewd))
@@ -173,8 +175,11 @@ for t in range(num_epochs*ep_per_epoch):
                     d_ph: D['d']
                     }
 
+            #outs = sess.run( opt_action_value, feed_dict=feed_dict)
+            #print(outs)
+
             # Update optimal action-value function (Q*)
-            outs = sess.run([ loss_opt_act_val, opt_act_value_train], feed_dict=feed_dict)
+            outs = sess.run([ loss_opt_act_val, opt_action_value, opt_act_value_train], feed_dict=feed_dict)
             logger.store(LossQ=outs[0], QVals=outs[1])
 
             # Update deterministic optimal action function (pi*)
@@ -195,6 +200,7 @@ for t in range(num_epochs*ep_per_epoch):
 
         if epoch % save_freq == 0 or epoch == num_epochs-1:
             logger.save_state({env:env}, None)
+            print("saving state")
 
         # test
         test(env        = test_env,
