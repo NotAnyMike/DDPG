@@ -29,7 +29,7 @@ tf.set_random_seed(seed)
 
 # Create environment
 env = gym.make('BipedalWalker-v2')
-test_env = gym.make('BipedalWlaker-v2')
+test_env = gym.make('BipedalWalker-v2')
 #env.render()
 
 # Get imporant variables
