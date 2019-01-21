@@ -61,12 +61,12 @@ with tf.variable_scope('main'):
 
     with tf.variable_scope('q'):
         opt_action_value = tf.squeeze(create_nn(
-                tf.concat([a_ph,s_ph], axis=-1),
+                tf.concat([s_ph,a_ph], axis=-1),
                 hidden_sizes=hidden_sizes+[1]), axis=1)
 
     with tf.variable_scope('q', reuse=True):
         opt_action_value2 = tf.squeeze(create_nn(
-                tf.concat([opt_action,s_ph], axis=-1),
+                tf.concat([s_ph,opt_action], axis=-1),
                 hidden_sizes=hidden_sizes+[1]), axis=1)
 
 with tf.variable_scope('target'):
@@ -76,7 +76,7 @@ with tf.variable_scope('target'):
 
     with tf.variable_scope('q'):
         opt_action_value2_target = tf.squeeze(create_nn(
-                tf.concat([opt_action_target,s_ph], axis=-1),
+                tf.concat([s_ph,opt_action_target], axis=-1),
                 hidden_sizes=hidden_sizes+[1]), axis=1)
 
 # Count variables to check if the number is right
@@ -183,11 +183,11 @@ for t in range(num_epochs*ep_per_epoch):
             logger.store(LossQ=outs[0], QVals=outs[1])
 
             # Update deterministic optimal action function (pi*)
-            outs = sess.run([ loss_opt_action, opt_action_train], feed_dict=feed_dict)
+            outs = sess.run([ loss_opt_action, opt_action_train, target_update], feed_dict=feed_dict)
             logger.store(LossPi=outs[0])
 
             # Update target functions
-            sess.run([ target_update ], feed_dict=feed_dict)
+            #sess.run([ target_update ], feed_dict=feed_dict)
 
         logger.store(EpRet=rewd, EpLen=ep_len)
 
@@ -200,7 +200,6 @@ for t in range(num_epochs*ep_per_epoch):
 
         if epoch % save_freq == 0 or epoch == num_epochs-1:
             logger.save_state({env:env}, None)
-            print("saving state")
 
         # test
         test(env        = test_env,
