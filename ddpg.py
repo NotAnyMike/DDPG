@@ -111,16 +111,19 @@ buf = ReplayBuffer(buffer_size, obs_dim, action_dim)
 # Set logger
 #logger = EpochLogger(**logger_kwargs)
 logger = EpochLogger()
+logger.save_config(locals())
 
 # Start session and set dynamic memory
-#config = tf.ConfigProto()
-#config.gpu_options.allow_growth = True
-#sess = tf.Session(config=config)
-sess = tf.Session()
+config = tf.ConfigProto()
+config.gpu_options.allow_growth = True
+sess = tf.Session(config=config)
 
 # Initialize placeholders
 sess.run(tf.global_variables_initializer())
 sess.run(target_init)
+
+# Model saving config
+logger.setup_tf_saver(sess, inputs={'x': x_ph, 'a': a_ph}, outputs={'pi': pi, 'q': q})
 
 # Main loop
 start_time = time.time()
