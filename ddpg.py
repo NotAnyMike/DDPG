@@ -2,7 +2,8 @@
 import gym
 import tensorflow as tf
 import numpy as np
-from utils import create_nn, get_action, get_vars, count_vars
+import time
+from utils import create_nn, get_action, get_vars, count_vars, test
 from replay_buffer import ReplayBuffer
 from pdb import set_trace
 from spinup.utils.logx import EpochLogger
@@ -121,6 +122,7 @@ sess.run(tf.global_variables_initializer())
 sess.run(target_init)
 
 # Main loop
+start_time = time.time()
 ep_len, rewd, s = 0, 0.0 , env.reset()
 for t in range(num_epochs*ep_per_epoch):
     # Episode
@@ -182,16 +184,28 @@ for t in range(num_epochs*ep_per_epoch):
         ep_len, rewd, s = 0, 0.0 , env.reset()
 
     # Printing 
-    if t % ep_per_epoch == 0:
+    if t > 0 and t % ep_per_epoch == 0:
         epoch = t // ep_per_epoch
-        pass
-        # Epoch
-        # EpRet
-        # TestEpRet
-        # EpLen
-        # TestEpLen
-        # TotalEnvInteracts
-        # QVals
-        # LossPi
-        # LossQ
-        # Time
+
+        # test
+        test(env        = gym.make('BipedalWalker-v2'),
+             max_ep_len = max_ep_len,
+             logger     = logger,
+             feed_dict  = {s_ph: s.reshape(1,-1)},
+             opt_action = opt_action,
+             sess       = sess,
+             max_value  = max_act,
+             act_dim    = action_dim,)
+
+        # Epoch, EpRet, TestEpRet, EpLen, TestEpLen, TotalEnvInteracts, QVals, LossPi, LossQ, Time,
+        logger.log_tabular('Epoch', epoch)
+        logger.log_tabular('EpRet', with_min_and_max=True)
+        logger.log_tabular('TestEpRet', with_min_and_max=True)
+        logger.log_tabular('EpLen', average_only=True)
+        logger.log_tabular('TestEpLen', average_only=True)
+        logger.log_tabular('TotalEnvInteracts', t)
+        logger.log_tabular('QVals', with_min_and_max=True)
+        logger.log_tabular('LossPi', average_only=True)
+        logger.log_tabular('LossQ', average_only=True)
+        logger.log_tabular('Time', time.time()-start_time)
+        logger.dump_tabular()
