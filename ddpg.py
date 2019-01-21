@@ -7,12 +7,12 @@ from utils import create_nn, get_action, get_vars, count_vars, test
 from replay_buffer import ReplayBuffer
 from pdb import set_trace
 from spinup.utils.logx import EpochLogger
-#from logx import EpochLogger
+from spinup.utils.run_utils import setup_logger_kwargs
 
 # Set Hyper-parameters
 seed         = 0
 num_epochs   = 100
-ep_per_epoch = 5000 #1000
+ep_per_epoch = 5000
 random_steps = 10000
 max_ep_len   = 1000
 hidden_sizes = [400,300]
@@ -22,6 +22,12 @@ gamma        = 0.99
 lr_a         = 1e-3
 lr_q         = 1e-3
 p            = 0.995
+save_freq    = 1
+
+# Set logger
+logger_kwargs = setup_logger_kwargs('test_own', seed)
+logger = EpochLogger(**logger_kwargs)
+logger.save_config(locals())
 
 # Setting seed
 np.random.seed(seed)
@@ -72,7 +78,7 @@ with tf.variable_scope('target'):
                 tf.concat([opt_action_target,s_ph], axis=-1),
                 hidden_sizes=hidden_sizes+[1]), axis=1)
 
-# Count variables
+# Count variables to check if the number is right
 var_counts = tuple(count_vars(scope) for scope in ['main/pi', 'main/q', 'main'])
 
 print('\nNumber of parameters: \t pi: %d, \t q: %d, \t total: %d\n'%var_counts)
@@ -108,10 +114,6 @@ target_update = tf.group(
 # Set buffer
 buf = ReplayBuffer(buffer_size, obs_dim, action_dim)
 
-# Set logger
-#logger = EpochLogger(**logger_kwargs)
-logger = EpochLogger()
-logger.save_config(locals())
 
 # Start session and set dynamic memory
 config = tf.ConfigProto()
@@ -123,7 +125,7 @@ sess.run(tf.global_variables_initializer())
 sess.run(target_init)
 
 # Model saving config
-logger.setup_tf_saver(sess, inputs={'x': x_ph, 'a': a_ph}, outputs={'pi': pi, 'q': q})
+logger.setup_tf_saver(sess, inputs={'s': s_ph, 'a': a_ph}, outputs={'pi': opt_action, 'q': opt_action_value})
 
 # Main loop
 start_time = time.time()
@@ -190,6 +192,9 @@ for t in range(num_epochs*ep_per_epoch):
     # Printing 
     if t > 0 and t % ep_per_epoch == 0:
         epoch = t // ep_per_epoch
+
+        if epoch % save_freq == 0 or epoch == num_epochs-1:
+            logger.save_state({env:env}, None)
 
         # test
         test(env        = test_env,
