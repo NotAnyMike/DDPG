@@ -80,8 +80,8 @@ with tf.variable_scope('target'):
 
 # Count variables to check if the number is right
 var_counts = tuple(count_vars(scope) for scope in ['main/pi', 'main/q', 'main'])
-
 print('\nNumber of parameters: \t pi: %d, \t q: %d, \t total: %d\n'%var_counts)
+
 # Create target value (y)
 # y = r + gamma*(1-d)*Qtar(s',atar'(s'))
 y = tf.stop_gradient(r_ph + gamma * (1-d_ph)*opt_action_value2_target)
@@ -94,8 +94,8 @@ loss_opt_act_val = tf.reduce_mean((opt_action_value - y)**2)
 loss_opt_action = -tf.reduce_mean(opt_action_value2)
 
 # Creating optimizers
-opt_act_value_optimizer = tf.train.AdamOptimizer(learning_rate=lr_q) # TODO
-opt_action_optimizer    = tf.train.AdamOptimizer(learning_rate=lr_a) # TODO
+opt_act_value_optimizer = tf.train.AdamOptimizer(learning_rate=lr_q)
+opt_action_optimizer    = tf.train.AdamOptimizer(learning_rate=lr_a)
 
 # Creating trainig operations
 opt_action_train    = opt_action_optimizer.minimize(loss_opt_action,var_list=get_vars('main/pi'))
@@ -142,6 +142,7 @@ for t in range(num_epochs*ep_per_epoch):
 
     s2, r, done, _ = env.step(a)
     rewd += r
+    ep_len +=1
     #env.render()
 
     # Ignoring done signal if comes from end of episode
@@ -153,7 +154,6 @@ for t in range(num_epochs*ep_per_epoch):
     # Store transition
     buf.store(s,a,r,s2,d)
     s = s2
-    ep_len +=1
 
     # Update
     if d or ep_len == max_ep_len:
