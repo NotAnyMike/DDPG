@@ -29,6 +29,7 @@ tf.set_random_seed(seed)
 
 # Create environment
 env = gym.make('BipedalWalker-v2')
+test_env = gym.make('BipedalWlaker-v2')
 #env.render()
 
 # Get imporant variables
@@ -151,7 +152,7 @@ for t in range(num_epochs*ep_per_epoch):
 
     # Update
     if d or ep_len == max_ep_len:
-        print("Updating (t %i/%i, rewd %0.2f)..." % (t,num_epochs*ep_per_epoch,rewd))
+        #print("Updating (t %i/%i, rewd %0.2f)..." % (t,num_epochs*ep_per_epoch,rewd))
 
         for _ in range(ep_len):
             # Starting to update the parameters
@@ -188,7 +189,7 @@ for t in range(num_epochs*ep_per_epoch):
         epoch = t // ep_per_epoch
 
         # test
-        test(env        = gym.make('BipedalWalker-v2'),
+        test(env        = test_env,
              max_ep_len = max_ep_len,
              logger     = logger,
              feed_dict  = {s_ph: s.reshape(1,-1)},
