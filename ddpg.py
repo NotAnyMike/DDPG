@@ -87,12 +87,12 @@ print('\nNumber of parameters: \t pi: %d, \t q: %d, \t total: %d\n'%var_counts)
 # y = r + gamma*(1-d)*Qtar(s',atar'(s'))
 y = tf.stop_gradient(r_ph + gamma * (1-d_ph)*opt_action_value2_target)
 
+# Create loss function for optimal deterministic policy (u(s))
+loss_opt_action = -tf.reduce_mean(opt_action_value2)
+
 # Create loss for optimal action-value function (Q* loss function)
 # loss = E(Q*(a,s)-y) = E((Q*(a,v)-(r+gamma*Q(s',a(s')))^2)
 loss_opt_act_val = tf.reduce_mean((opt_action_value - y)**2)
-
-# Create loss function for optimal deterministic policy (u(s))
-loss_opt_action = -tf.reduce_mean(opt_action_value2)
 
 # Creating optimizers
 opt_act_value_optimizer = tf.train.AdamOptimizer(learning_rate=lr_q)
@@ -133,7 +133,6 @@ logger.setup_tf_saver(sess, inputs={'s': s_ph, 'a': a_ph}, outputs={'pi': opt_ac
 start_time = time.time()
 ep_len, rewd, s = 0, 0.0 , env.reset()
 for t in range(num_epochs*ep_per_epoch):
-    # Episode
 
     if random_steps >= t:
         a = action_space.sample()
@@ -175,11 +174,8 @@ for t in range(num_epochs*ep_per_epoch):
                     d_ph: D['d']
                     }
 
-            #outs = sess.run( opt_action_value, feed_dict=feed_dict)
-            #print(outs)
-
             # Update optimal action-value function (Q*)
-            outs = sess.run([ loss_opt_act_val, opt_action_value, opt_act_value_train], feed_dict=feed_dict)
+            outs = sess.run([loss_opt_act_val, opt_action_value, opt_act_value_train], feed_dict=feed_dict)
             logger.store(LossQ=outs[0], QVals=outs[1])
 
             # Update deterministic optimal action function (pi*)
@@ -205,7 +201,7 @@ for t in range(num_epochs*ep_per_epoch):
         test(env        = test_env,
              max_ep_len = max_ep_len,
              logger     = logger,
-             feed_dict  = {s_ph: s.reshape(1,-1)},
+             s_ph       = s_ph,
              opt_action = opt_action,
              sess       = sess,
              max_value  = max_act,

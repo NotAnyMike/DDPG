@@ -33,12 +33,12 @@ def count_vars(scope):
     v = get_vars(scope)
     return sum([np.prod(var.shape.as_list()) for var in v])
 
-def test(env, max_ep_len, logger, feed_dict, opt_action, sess, max_value, act_dim, n=10):
+def test(env, max_ep_len, logger, s_ph, opt_action, sess, max_value, act_dim, n=10):
     for _ in range(n):
         s, r, d, ep_len, ep_ret = env.reset(), 0.0, False, 0, 0.0
         while not d or ep_len < max_ep_len:
             s, r, d, _ = env.step(get_action(
-                feed_dict, 
+                {s_ph:s.reshape(1,-1)}, 
                 opt_action, 
                 sess, 
                 max_value, 
