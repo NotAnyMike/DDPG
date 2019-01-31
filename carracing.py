@@ -13,5 +13,6 @@ for i in range(10000):
         print("placing")
         p = env.get_rnd_point_in_track()
         env.place_agent(p)
+    set_trace()
     env.render()
     env.step(env.action_space.sample()) # take a random action
