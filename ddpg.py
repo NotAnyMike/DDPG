@@ -11,7 +11,7 @@ from spinup.utils.run_utils import setup_logger_kwargs
 from tensorflow.python import debug as tf_debug
 
 # Set Hyper-parameters
-seed         = 0
+seed         = 125259
 num_epochs   = 100
 ep_per_epoch = 5000
 random_steps = 10000
